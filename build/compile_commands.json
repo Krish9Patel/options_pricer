@@ -1,0 +1,32 @@
+[
+{
+  "directory": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe   -g -std=gnu++17 -o CMakeFiles\\aad_core.dir\\aad_ops.cpp.obj -c C:\\Users\\krish\\OneDrive\\Desktop\\Pop\\options_pricer\\backend\\src\\cpp_src\\aad_ops.cpp",
+  "file": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src/aad_ops.cpp",
+  "output": "CMakeFiles/aad_core.dir/aad_ops.cpp.obj"
+},
+{
+  "directory": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe   -g -std=gnu++17 -o CMakeFiles\\aad_core.dir\\matrix_ops_aad.cpp.obj -c C:\\Users\\krish\\OneDrive\\Desktop\\Pop\\options_pricer\\backend\\src\\cpp_src\\matrix_ops_aad.cpp",
+  "file": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src/matrix_ops_aad.cpp",
+  "output": "CMakeFiles/aad_core.dir/matrix_ops_aad.cpp.obj"
+},
+{
+  "directory": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe   -g -std=gnu++17 -o CMakeFiles\\utils.dir\\utils_cpp.cpp.obj -c C:\\Users\\krish\\OneDrive\\Desktop\\Pop\\options_pricer\\backend\\src\\cpp_src\\utils_cpp.cpp",
+  "file": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src/utils_cpp.cpp",
+  "output": "CMakeFiles/utils.dir/utils_cpp.cpp.obj"
+},
+{
+  "directory": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe   -g -std=gnu++17 -o CMakeFiles\\lsmc_pricer.dir\\lsmc_aad_pricer.cpp.obj -c C:\\Users\\krish\\OneDrive\\Desktop\\Pop\\options_pricer\\backend\\src\\cpp_src\\lsmc_aad_pricer.cpp",
+  "file": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src/lsmc_aad_pricer.cpp",
+  "output": "CMakeFiles/lsmc_pricer.dir/lsmc_aad_pricer.cpp.obj"
+},
+{
+  "directory": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -Dlsmc_aad_interface_EXPORTS  -g -std=gnu++17 -o CMakeFiles\\lsmc_aad_interface.dir\\lsmc_aad_interface.cpp.obj -c C:\\Users\\krish\\OneDrive\\Desktop\\Pop\\options_pricer\\backend\\src\\cpp_src\\lsmc_aad_interface.cpp",
+  "file": "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src/lsmc_aad_interface.cpp",
+  "output": "CMakeFiles/lsmc_aad_interface.dir/lsmc_aad_interface.cpp.obj"
+}
+]

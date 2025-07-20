@@ -1,0 +1,2 @@
+C:\msys64\ucrt64\bin\ar.exe qc libaad_core.a CMakeFiles/aad_core.dir/aad_ops.cpp.obj CMakeFiles/aad_core.dir/matrix_ops_aad.cpp.obj
+C:\msys64\ucrt64\bin\ranlib.exe libaad_core.a

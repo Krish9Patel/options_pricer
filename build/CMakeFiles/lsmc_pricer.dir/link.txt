@@ -1,0 +1,2 @@
+C:\msys64\ucrt64\bin\ar.exe qc liblsmc_pricer.a CMakeFiles/lsmc_pricer.dir/lsmc_aad_pricer.cpp.obj
+C:\msys64\ucrt64\bin\ranlib.exe liblsmc_pricer.a

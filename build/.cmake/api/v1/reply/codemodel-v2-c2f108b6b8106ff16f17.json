@@ -1,0 +1,87 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.10"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "LSMC_AAD_Pricer",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "aad_core::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-aad_core-Debug-fc233db4a786630cc7ef.json",
+					"name" : "aad_core",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lsmc_aad_interface::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lsmc_aad_interface-Debug-0db477c3fd1359b0c80e.json",
+					"name" : "lsmc_aad_interface",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "lsmc_pricer::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-lsmc_pricer-Debug-cd4a96dd9bc550f4ec88.json",
+					"name" : "lsmc_pricer",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "utils::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-utils-Debug-5c4d06d49363b0a1cbd9.json",
+					"name" : "utils",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/build",
+		"source" : "C:/Users/krish/OneDrive/Desktop/Pop/options_pricer/backend/src/cpp_src"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

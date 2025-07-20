@@ -1,0 +1,46 @@
+/financial-sim-platform
+├── /backend
+│   ├── /src
+│   │   ├── app.js                 # Main Node.js server entry point (Express)
+│   │   ├── routes.js              # Defines API endpoints (e.g., /api/simulate-aad-option)
+│   │   ├── controllers.js         # Handles business logic, calls C++ functions via FFI
+│   │   ├── ffi_interface.js       # Sets up ffi-napi to expose C++ functions
+│   │   └── utils.js               # Backend utility functions (e.g., input validation)
+│   ├── /cpp_src                   # C++ source for LSMC with AAD core
+│   │   ├── CMakeLists.txt         # CMake build system configuration (recommended for C++ projects)
+│   │   ├── lsmc_aad_interface.h   # C-compatible header for functions exposed to Node.js
+│   │   ├── lsmc_aad_interface.cpp # C-compatible wrapper for LSMC_AAD_Pricer
+│   │   ├── lsmc_aad_pricer.h      # C++ header for the LSMC pricer using AAD types
+│   │   ├── lsmc_aad_pricer.cpp    # C++ implementation of LSMC pricer with AAD
+│   │   ├── aad_types.h            # Defines AD_double, Tape, and related AAD structures
+│   │   ├── aad_ops.h              # Declarations for AAD-enabled arithmetic/math operations
+│   │   ├── aad_ops.cpp            # Implementations of AAD-enabled operations (operator overloads)
+│   │   ├── matrix_ops_aad.h       # Declarations for AAD-enabled matrix operations
+│   │   ├── matrix_ops_aad.cpp     # Implementations of AAD-enabled matrix operations (for regression)
+│   │   ├── utils_cpp.h            # C++ utility functions (e.g., RNG, GBM path generation)
+│   │   ├── utils_cpp.cpp          # Implementations of C++ utilities
+│   │   └── external_aad_library/  # (Optional) Placeholder if integrating a third-party AAD library (e.g., ADOL-C)
+│   ├── package.json               # Node.js dependencies (express, ffi-napi, ref, ref-array)
+│   └── .env                       # Environment variables (e.g., PORT)
+│
+├── /frontend
+│   ├── public/                    # Static assets
+│   ├── src/
+│   │   ├── App.js                 # Main React application component
+│   │   ├── index.js               # React entry point
+│   │   ├── components/
+│   │   │   ├── OptionInputForm.js     # Component for user inputs
+│   │   │   ├── ResultsDisplay.js      # Displays primal price and Greeks
+│   │   │   ├── MonteCarloPathsChart.js # Visualizes simulated paths
+│   │   │   ├── PayoffPlot.js          # Visualizes option payoff
+│   │   │   ├── GreeksDisplay.js       # NEW: Component to display Delta, Gamma, Vega, Rho, Theta
+│   │   │   └── ConvergencePlot.js     # (Optional) For price/Greek convergence
+│   │   ├── api/
+│   │   │   └── simulationApi.js   # Functions to call backend API
+│   │   ├── hooks/                 # Custom React hooks
+│   │   ├── styles/                # Tailwind CSS configuration or custom CSS
+│   │   └── utils/                 # Frontend utility functions
+│   ├── package.json               # React dependencies (react, recharts, axios, tailwindcss)
+│   └── README.md                  # Frontend README
+│
+└── README.md                      # Overall project README
