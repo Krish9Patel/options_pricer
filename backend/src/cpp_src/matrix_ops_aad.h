@@ -1,0 +1,71 @@
+#ifndef MATRIX_OPS_AAD_H
+#define MATRIX_OPS_AAD_H
+
+#include "aad_types.h"
+#include <vector>
+#include <numeric> // For std::iota (future matrix creation)
+#include <stdexcept> // For exceptions
+
+// Simple matrix class template to work with AD_double 
+// For production add dedicated lin alg library like Eigen
+
+template <typename T>
+class Matrix {
+public:
+    int rows;
+    int cols;
+    std::vector<T> data;
+    
+    Matrix(int r, int c, T initial_val = T(0.0)) : rows(r), cols(c), data(r * c, initial_val) {
+        if (r <= 0 || c <= 0) {
+            throw std::invalid_argument("Matrix dimensions must be positive.");
+        }
+    }
+
+    // Access element -> row-major order
+    T& operator()(int r, int c) {
+        if (r >= rows || c >= cols || r < 0 || c < 0) {
+            throw std::out_of_range("Matrix index out of bounds.");
+        }
+        return dataa[r * cols + c];
+    }
+
+    const T& operator()(int r, int c) const {
+        if (r >= rows || c >= cols || r < 0 || c < 0) {
+            throw std::out_of_range("Matrix index out of bounds.");
+        }
+        return data[r * cols + c];
+    }
+
+    // Matrix multiplication (AB)
+    template <typename U>
+    Matrix<decltype(T() * U())> operator*(const Matrix<U>& other) const {
+        if (cols != other.rows) {
+            throw std::invalid_argument("Matrix dimensions must match for multiplication.");
+        }
+
+        Matrix<decltype(T() * U())> result(rows, other.cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < other.cols; j++) {
+                for (int k = 0; k < cols; k++) {
+                    result(i, j) += (*this)(i, k) * other(k, j);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    // Transpose matrix
+    Matrix<T> transpose() const {
+        Matrix<T> result(cols, rows);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                result(j, i) = (*this)(i, j);
+            }
+        }
+        return result;
+    }
+
+    // Matrix Inverse 
+}
