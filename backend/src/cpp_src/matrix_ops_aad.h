@@ -68,4 +68,53 @@ public:
     }
 
     // Matrix Inverse 
+    Matrix<T> inverse() const {
+        if (rows != cols) {
+            throw std::invalid_argument("Only square matrices can be inverted.");
+        }
+
+        int n = rows;
+        Matrix<T> augmented(n, 2 * n);
+
+        // Create augmented matrix [A | I]
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                augmented(i, j) = (*this)(i, j);
+            }
+            augmented(i, n + i) = T(1.0); // Identity matrix
+        }
+
+        // Perform Gaussian elimination
+        for (int i = 0; i < n; i++) {
+            // Pivoting
+            T pivot = augmented(i, i);
+            if (pivot == T(0.0)) {
+                throw std::runtime_error("Matrix is singular and cannot be inverted.");
+            }
+            for (int j = 0; j < 2 * n; j++) {
+                augmented(i, j) /= pivot;
+            }
+
+            // Eliminate other rows
+            for (int k = 0; k < n; k++) {
+                if (k != i) {
+                    T factor = augmented(k, i);
+                    for (int j = 0; j < 2 * n; j++) {
+                        augmented(k, j) -= factor * augmented(i, j);
+                    }
+                }
+            }
+        }
+
+        // Extract the inverse matrix from the augmented matrix
+        Matrix<T> inverse(n, n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                inverse(i, j) = augmented(i, n + j);
+            }
+        }
+
+        return inverse;
+    }
+
 }
