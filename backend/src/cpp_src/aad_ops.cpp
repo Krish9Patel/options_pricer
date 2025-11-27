@@ -32,9 +32,8 @@ void reverse_pass(int start_idx) {
         for (size_t p_idx = 0; p_idx < node.parents.size(); ++p_idx) {
             int parent_tape_idx = node.parents[p_idx];
             double weight = node.weights[p_idx];
-            current_tape -> nodes[parent_tape_idx].adjoint += node.adjoint * weight;
+            curr_tape -> nodes[parent_tape_idx].adjoint += node.adjoint * weight;
         }
-        node.adjoint = 0.0; // reset for next 
     }
 }
 
@@ -101,6 +100,26 @@ AD_double operator/(const AD_double& lhs, double rhs) {
 
 AD_double operator/(double lhs, const AD_double& rhs) {
     return AD_double(lhs) / rhs; 
+}
+
+// Comparison
+bool operator==(const AD_double& lhs, const AD_double& rhs) {
+    return lhs.val() == rhs.val();
+}
+bool operator==(const AD_double& lhs, double rhs) {
+    return lhs.val() == rhs;
+}
+bool operator==(double lhs, const AD_double& rhs) {
+    return lhs == rhs.val();
+}
+bool operator!=(const AD_double& lhs, const AD_double& rhs) {
+    return !(lhs == rhs);
+}
+bool operator!=(const AD_double& lhs, double rhs) {
+    return !(lhs == rhs);
+}
+bool operator!=(double lhs, const AD_double& rhs) {
+    return !(lhs == rhs);
 }
 
 // Math functions 

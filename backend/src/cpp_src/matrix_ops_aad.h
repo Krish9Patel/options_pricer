@@ -27,7 +27,7 @@ public:
         if (r >= rows || c >= cols || r < 0 || c < 0) {
             throw std::out_of_range("Matrix index out of bounds.");
         }
-        return dataa[r * cols + c];
+        return data[r * cols + c];
     }
 
     const T& operator()(int r, int c) const {
@@ -45,10 +45,11 @@ public:
         }
 
         Matrix<decltype(T() * U())> result(rows, other.cols);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < other.cols; j++) {
-                for (int k = 0; k < cols; k++) {
-                    result(i, j) += (*this)(i, k) * other(k, j);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < other.cols; ++j) {
+                for (int k = 0; k < cols; ++k) {
+                    // result(i, j) += (*this)(i, k) * other(k, j);
+                    result(i, j) = result(i, j) + (*this)(i, k) * other(k, j);
                 }
             }
         }
@@ -59,8 +60,8 @@ public:
     // Transpose matrix
     Matrix<T> transpose() const {
         Matrix<T> result(cols, rows);
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
                 result(j, i) = (*this)(i, j);
             }
         }
@@ -77,30 +78,35 @@ public:
         Matrix<T> augmented(n, 2 * n);
 
         // Create augmented matrix [A | I]
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
                 augmented(i, j) = (*this)(i, j);
             }
             augmented(i, n + i) = T(1.0); // Identity matrix
         }
 
         // Perform Gaussian elimination
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < n; ++i) {
             // Pivoting
             T pivot = augmented(i, i);
+            // Check for zero pivot. For AD_double, we need to check the value.
+            // Since we can't easily check type, we rely on operator== being available.
+            // If T is AD_double, we need operator==(AD_double, AD_double).
             if (pivot == T(0.0)) {
                 throw std::runtime_error("Matrix is singular and cannot be inverted.");
             }
-            for (int j = 0; j < 2 * n; j++) {
-                augmented(i, j) /= pivot;
+            for (int j = 0; j < 2 * n; ++j) {
+                // augmented(i, j) /= pivot;
+                augmented(i, j) = augmented(i, j) / pivot;
             }
 
             // Eliminate other rows
-            for (int k = 0; k < n; k++) {
+            for (int k = 0; k < n; ++k) {
                 if (k != i) {
                     T factor = augmented(k, i);
-                    for (int j = 0; j < 2 * n; j++) {
-                        augmented(k, j) -= factor * augmented(i, j);
+                    for (int j = 0; j < 2 * n; ++j) {
+                        // augmented(k, j) -= factor * augmented(i, j);
+                        augmented(k, j) = augmented(k, j) - (factor * augmented(i, j));
                     }
                 }
             }
@@ -108,8 +114,8 @@ public:
 
         // Extract the inverse matrix from the augmented matrix
         Matrix<T> inverse(n, n);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
                 inverse(i, j) = augmented(i, n + j);
             }
         }
@@ -117,4 +123,6 @@ public:
         return inverse;
     }
 
-}
+}; // Added semicolon
+
+#endif // Added endif

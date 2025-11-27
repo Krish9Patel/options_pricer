@@ -16,9 +16,7 @@ enum Optype {
     OP_SQRT,
     OP_SIN,
     OP_COS,
-    OP_TAN,
-    OP_COS,
-    OP_TAN,
+    OP_TAN
     // I think thats good enough for now, can add more later
 };
 
@@ -39,6 +37,14 @@ AD_double operator*(const AD_double& lhs, double rhs);
 AD_double operator*(double lhs, const AD_double& rhs);
 AD_double operator/(const AD_double& lhs, double rhs);
 AD_double operator/(double lhs, const AD_double& rhs);
+
+// Comparison
+bool operator==(const AD_double& lhs, const AD_double& rhs);
+bool operator==(const AD_double& lhs, double rhs);
+bool operator==(double lhs, const AD_double& rhs);
+bool operator!=(const AD_double& lhs, const AD_double& rhs);
+bool operator!=(const AD_double& lhs, double rhs);
+bool operator!=(double lhs, const AD_double& rhs);
 
 // Math functions
 AD_double exp(const AD_double& val);
