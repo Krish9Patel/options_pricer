@@ -13,4 +13,4 @@ AD_double smooth_max(const AD_double& a, const AD_double& b, double epsilon);
 // Smooth put payoff helper: max(K - S, 0), smoothed.
 AD_double smooth_put_payoff(const AD_double& S, double K, double epsilon);
 
-#endif // AAD_SMOOTH_H
+#endif 

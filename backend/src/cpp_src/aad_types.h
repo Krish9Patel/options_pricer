@@ -100,7 +100,7 @@ public:
 
 private:
     double val_;
-    int    idx_; // index into tape (-1 = constant, not on tape)
+    int idx_; // index into tape (-1 = constant, not on tape)
 };
 
 #endif
