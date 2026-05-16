@@ -2,40 +2,63 @@
 #define LSMC_AAD_PRICER_H
 
 #include "aad_types.h"
-#include "matrix_ops_aad.h"
-#include "utils_cpp.h"
 #include <vector>
+#include <random>
+#include <cstdint>
 
 class LSMCAADPricer {
 public:
-    // Constructor
-    LSMCAADPricer(double s0, double K, double r, double sigma, double T, int n_steps, int n_sims);
+    // Configuration
+    struct Config {
+        int      num_paths;
+        int      num_steps;
+        double   S0;
+        double   K;
+        double   r;
+        double   sigma;
+        double   T;
+        int      num_basis;       // number of polynomial basis functions
+        double   smooth_epsilon;  // sigmoid smoothing parameter (e.g. 0.01 * K)
+        uint64_t rng_seed;      // fixed seed for reproducibility
+    };
 
-    // Main pricing function
-    AD_double price();
+    LSMCAADPricer(const Config& config);
 
-    // Calculate Greeks (Delta, Vega, Rho)
-    // Returns a vector: [Delta, Vega, Rho]
-    std::vector<double> calculate_greeks();
+    // PASS 1: Calibration (pure double, no tape)
+    // Populates betas_; must be called before price_and_greeks()
+    void calibrate();
+
+    // PASS 2: Valuation with AAD (AD_double, records to tape)
+    // Returns the option price; Greeks are written to the out-parameters.
+    // Note: theta returned is ∂V/∂T. Conventional Theta is -∂V/∂T.
+    double price_and_greeks(
+        double& delta,    // ∂V/∂S₀
+        double& vega,     // ∂V/∂σ
+        double& rho,      // ∂V/∂r
+        double& theta     // ∂V/∂T  (negate for conventional Theta)
+    );
 
 private:
-    // Raw inputs
-    double raw_s0;
-    double raw_K;
-    double raw_r;
-    double raw_sigma;
+    Config config_;
 
-    // Inputs as AD_double to be recorded on tape
-    AD_double s0_ad;
-    AD_double K_ad;
-    AD_double r_ad;
-    AD_double sigma_ad;
-    double T_maturity; // Time is usually constant
-    int n_steps;
-    int n_sims;
+    // Stored from Pass 1 — one vector of coefficients per timestep
+    // betas_[t] = {β₀, β₁, β₂, ...} for timestep t
+    std::vector<std::vector<double>> betas_;
 
-    // Helper to compute payoff
-    AD_double payoff(const AD_double& S) const;
+    // RNG state management
+    std::mt19937_64 rng_;
+    void reset_rng() { rng_.seed(config_.rng_seed); }
+
+    // Helper: evaluate polynomial basis at S given coefficients
+    static double evaluate_basis(const std::vector<double>& beta, double S) {
+        double result = 0.0;
+        double basis  = 1.0;
+        for (size_t k = 0; k < beta.size(); ++k) {
+            result += beta[k] * basis;
+            basis  *= S;
+        }
+        return result;
+    }
 };
 
 #endif // LSMC_AAD_PRICER_H

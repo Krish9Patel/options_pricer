@@ -1,72 +1,62 @@
 #include "aad_ops.h"
 
-std::shared_ptr<Tape> curr_tape = nullptr;
-
-void initialize_aad_tape() {
-    if (!curr_tape) {
-        curr_tape = std::make_shared<Tape>();
-    } else {
-        curr_tape -> clear(); // Clear existing tape if initialized
-    }
+// Helper: push a binary node and wrap as AD_double
+static AD_double make_binary_node(double value, int p1, double w1, int p2, double w2) {
+    AD_double result;
+    result.set_val(value);
+    int idx = static_cast<int>(Tape::instance().push_back(Node{value, 0.0, w1, w2, p1, p2}));
+    result.set_tape_index(idx);
+    return result;
 }
 
-// Perform reverse pass to compute adjoints
-void reverse_pass(int start_idx) {
-    if (!curr_tape || curr_tape -> nodes.empty()) {
-        return;
-    }
-
-    if (start_idx != -1 && start_idx < curr_tape -> nodes.size()) {
-        curr_tape -> nodes[start_idx].adjoint = 1.0; // Initialize adjoint of the output node
-    } else {
-        curr_tape -> nodes.back().adjoint = 1.0; // Default to last node if no start index provided
-    }
-
-    for (int i = curr_tape -> nodes.size() - 1; i >= 0; --i) {
-        Node& node = curr_tape -> nodes[i];
-
-        if (node.adjoint == 0.0 && i != start_idx) {
-            continue; // Skip if adjoint = 0 
-        }
-
-        for (size_t p_idx = 0; p_idx < node.parents.size(); ++p_idx) {
-            int parent_tape_idx = node.parents[p_idx];
-            double weight = node.weights[p_idx];
-            curr_tape -> nodes[parent_tape_idx].adjoint += node.adjoint * weight;
-        }
-    }
+// Unary helper
+static AD_double make_unary_node(double value, int p, double w) {
+    AD_double result;
+    result.set_val(value);
+    int idx = static_cast<int>(Tape::instance().push_back(Node{value, 0.0, w, 0.0, p, -1}));
+    result.set_tape_index(idx);
+    return result;
 }
 
-// Operator overloads 
+
+// Addition with constant fast paths
 AD_double operator+(const AD_double& lhs, const AD_double& rhs) {
-    double result = lhs.val() + rhs.val();
-    int new_idx = curr_tape -> record(result, OP_ADD, {lhs.tape_idx, rhs.tape_idx}, {1.0, 1.0}); // d(a+b)/da = 1, d(a+b)/db = 1
-    return AD_double(new_idx);
+    int p1 = lhs.tape_index();
+    int p2 = rhs.tape_index();
+    if (p1 < 0 && p2 < 0) return AD_double(lhs.val() + rhs.val());  // const + const
+    return make_binary_node(lhs.val() + rhs.val(), p1, 1.0, p2, 1.0);
 }
 
+// Subtraction
 AD_double operator-(const AD_double& lhs, const AD_double& rhs) {
-    double result = lhs.val() - rhs.val();
-    int new_idx = curr_tape -> record(result, OP_SUB, {lhs.tape_idx, rhs.tape_idx}, {1.0, -1.0}); // d(a-b)/da = 1, d(a-b)/db = -1
-    return AD_double(new_idx);
+    int p1 = lhs.tape_index();
+    int p2 = rhs.tape_index();
+    if (p1 < 0 && p2 < 0) return AD_double(lhs.val() - rhs.val());
+    return make_binary_node(lhs.val() - rhs.val(), p1, 1.0, p2, -1.0);
 }
 
+// Multiplication: ∂(a·b)/∂a = b, ∂(a·b)/∂b = a
 AD_double operator*(const AD_double& lhs, const AD_double& rhs) {
-    double result = lhs.val() * rhs.val();
-    int new_idx = curr_tape -> record(result, OP_MUL, {lhs.tape_idx, rhs.tape_idx}, {rhs.val(), lhs.val()}); // d(ab)/da = b, d(ab)/db = a
-    return AD_double(new_idx);
+    int p1 = lhs.tape_index();
+    int p2 = rhs.tape_index();
+    if (p1 < 0 && p2 < 0) return AD_double(lhs.val() * rhs.val());
+    return make_binary_node(lhs.val() * rhs.val(), p1, rhs.val(), p2, lhs.val());
 }
 
-AD_double operator/(const AD_double& lhs, const AD_double& rhs) { 
-    double result = lhs.val() / rhs.val();
-    int new_idx = curr_tape -> record(result, OP_DIV, {lhs.tape_idx, rhs.tape_idx}, {1.0 / rhs.val(), -lhs.val() / (rhs.val() * rhs.val())}); // d(a/b)/da = 1/b, d(a/b)/db = -a/b^2
-    return AD_double(new_idx);
+// Division: ∂(a/b)/∂a = 1/b, ∂(a/b)/∂b = -a/b²
+AD_double operator/(const AD_double& lhs, const AD_double& rhs) {
+    int p1 = lhs.tape_index();
+    int p2 = rhs.tape_index();
+    double inv_b = 1.0 / rhs.val();
+    if (p1 < 0 && p2 < 0) return AD_double(lhs.val() * inv_b);
+    return make_binary_node(lhs.val() * inv_b, p1, inv_b, p2, -lhs.val() * inv_b * inv_b);
 }
 
 // Unary minus
 AD_double operator-(const AD_double& val) {
-    double result = -val.val();
-    int new_idx = curr_tape -> record(result, OP_NEG, {val.tape_idx}, {-1.0}); // d(-a)/da = -1
-    return AD_double(new_idx);
+    int p = val.tape_index();
+    if (p < 0) return AD_double(-val.val());
+    return make_unary_node(-val.val(), p, -1.0);
 }
 
 // Scalar operations
@@ -121,40 +111,58 @@ bool operator!=(const AD_double& lhs, double rhs) {
 bool operator!=(double lhs, const AD_double& rhs) {
     return !(lhs == rhs);
 }
+bool operator<(const AD_double& lhs, const AD_double& rhs) {
+    return lhs.val() < rhs.val();
+}
+bool operator<(const AD_double& lhs, double rhs) {
+    return lhs.val() < rhs;
+}
+bool operator<(double lhs, const AD_double& rhs) {
+    return lhs < rhs.val();
+}
+bool operator>(const AD_double& lhs, const AD_double& rhs) {
+    return lhs.val() > rhs.val();
+}
+bool operator>(const AD_double& lhs, double rhs) {
+    return lhs.val() > rhs;
+}
+bool operator>(double lhs, const AD_double& rhs) {
+    return lhs > rhs.val();
+}
 
 // Math functions 
-AD_double exp(const AD_double& val) {
-    double result = std::exp(val.val());
-    int new_idx = curr_tape -> record(result, OP_EXP, {val.tape_idx}, {result}); // d(exp(a))/da = exp(a)
-    return AD_double(new_idx);
+AD_double exp(const AD_double& x) {
+    double v = std::exp(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), v);  // d(exp)/dx = exp
 }
 
-AD_double log(const AD_double& val) {
-    double result = std::log(val.val());
-    int new_idx = curr_tape -> record(result, OP_LOG, {val.tape_idx}, {1.0 / val.val()}); // d(log(a))/da = 1/a
-    return AD_double(new_idx);
+AD_double log(const AD_double& x) {
+    double v = std::log(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), 1.0 / x.val());
 }
 
-AD_double sqrt(const AD_double& val) {
-    double result = std::sqrt(val.val());
-    int new_idx = curr_tape -> record(result, OP_SQRT, {val.tape_idx}, {(0.5 / result)}); // d(sqrt(a))/da = 0.5 / sqrt(a))
-    return AD_double(new_idx);
+AD_double sqrt(const AD_double& x) {
+    double v = std::sqrt(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), 0.5 / v);
 }
 
-AD_double sin(const AD_double& val) {
-    double result = std::sin(val.val());
-    int new_idx = curr_tape -> record(result, OP_SIN, {val.tape_idx}, {std::cos(val.val())}); // d(sin(a))/da = cos(a)
-    return AD_double(new_idx);
+AD_double sin(const AD_double& x) {
+    double v = std::sin(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), std::cos(x.val()));
 }
 
-AD_double cos(const AD_double& val) {
-    double result = std::cos(val.val());
-    int new_idx = curr_tape -> record(result, OP_COS, {val.tape_idx}, {-std::sin(val.val())}); // d(cos(a))/da = -sin(a)
-    return AD_double(new_idx);
+AD_double cos(const AD_double& x) {
+    double v = std::cos(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), -std::sin(x.val()));
 }
 
-AD_double tan(const AD_double& val) {
-    double result = std::tan(val.val());
-    int new_idx = curr_tape -> record(result, OP_TAN, {val.tape_idx}, {1.0 + result * result}); // d(tan(a))/da = sec^2(a)
-    return AD_double(new_idx);
+AD_double tan(const AD_double& x) {
+    double v = std::tan(x.val());
+    if (x.tape_index() < 0) return AD_double(v);
+    return make_unary_node(v, x.tape_index(), 1.0 + v * v);
 }

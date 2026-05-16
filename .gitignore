@@ -1,0 +1,38 @@
+# Documentation and Roadmaps
+documentation.txt
+production_aad_roadmap.txt
+structure.txt
+implementation_plan.txt
+# If you want to ignore all .txt and .md files except README.md:
+# *.txt
+# *.md
+# !README.md
+
+# Build Artifacts
+build/
+backend/src/cpp_src/build/
+*.exe
+*.dll
+*.lib
+*.so
+*.dylib
+*.o
+*.obj
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# IDE / OS Files
+.vscode/
+*.json
+
+.idea/
+.DS_Store
+*.swp
+
+# Specific source files to ignore
+backend/src/cpp_src/main.cpp

@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 add_library(aad_core STATIC
     aad_types.h
     aad_ops.h aad_ops.cpp
+    aad_smooth.h aad_smooth.cpp
     matrix_ops_aad.h matrix_ops_aad.cpp
 )
 
@@ -44,9 +45,11 @@ set_target_properties(lsmc_aad_interface PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
 
-# Optional: If you plan to add Google Test for unit testing
-# enable_testing()
-# find_package(GTest CONFIG REQUIRED)
-# add_executable(test_lsmc_aad test/test_lsmc_aad.cpp)
-# target_link_libraries(test_lsmc_aad GTest::gtest_main)
-# add_test(NAME LSMC_AAD_Tests COMMAND test_lsmc_aad)
+# Verification executable
+add_executable(test_lsmc_aad main.cpp)
+target_link_libraries(test_lsmc_aad
+    PRIVATE
+        aad_core
+        utils
+        lsmc_pricer
+)

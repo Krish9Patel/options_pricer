@@ -123,6 +123,6 @@ public:
         return inverse;
     }
 
-}; // Added semicolon
+}; 
 
-#endif // Added endif
+#endif 
